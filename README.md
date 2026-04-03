@@ -199,7 +199,9 @@ python run_shunyata_vairagya_gated.py
 
 Interactive dashboard with live hyperparameter controls, Maya developmental animation, and bilingual EN/ZH interface:
 
-**[🧠 Open Dashboard →](https://venky2099.github.io/Maya-Shunyata/maya_shunyata_dashboard.html)**
+**[🧠 Open Dashboard →](https://venky2099.github.io/Maya-Shunyata/docs/maya_shunyata_dashboard.html)**
+
+**[❓ Searchable FAQ →](https://venky2099.github.io/Maya-Shunyata/docs/faq.html)** · Bilingual EN/ZH · Silly to advanced · 20 questions
 
 ---
 
