@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maya-Śūnyatā | Interactive Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #11111a;
+  --surface2: #1a1a28;
+  --border: #2a2a3d;
+  --accent: #7c6fff;
+  --accent2: #ff6b9d;
+  --accent3: #4ecdc4;
+  --gold: #f5c842;
+  --text: #e8e8f0;
+  --text-dim: #8888aa;
+  --karma-color: #ff6b6b;
+  --vairagya-color: #4ecdc4;
+  --buddhi-color: #7c6fff;
+  --pruning-color: #ff9f43;
+  --glow: 0 0 20px rgba(124,111,255,0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── STARFIELD ── */
+#starfield {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 20% 50%, #1a0a2e 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, #0a1a2e 0%, transparent 60%),
+              var(--bg);
+}
+#starfield::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: 
+    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 8%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 65%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 25%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 50%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 80%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 90%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 55%, rgba(255,255,255,0.5) 0%, transparent 100%);
+}
+
+/* ── LAYOUT ── */
+.container { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+/* ── HEADER ── */
+header {
+  text-align: center;
+  padding: 48px 24px 32px;
+  position: relative;
+}
+.lang-toggle {
+  position: absolute; top: 24px; right: 24px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 16px;
+  cursor: pointer; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--accent); letter-spacing: 1px;
+  transition: all 0.3s; user-select: none;
+}
+.lang-toggle:hover { border-color: var(--accent); box-shadow: var(--glow); }
+
+.reset-btn {
+  position: absolute; top: 24px; left: 24px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 16px;
+  cursor: pointer; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--gold); letter-spacing: 1px;
+  transition: all 0.3s;
+}
+.reset-btn:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(245,200,66,0.3); }
+
+.series-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #2a1a4e, #1a2a4e);
+  border: 1px solid var(--accent);
+  border-radius: 20px; padding: 4px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--accent); letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+h1 {
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 300;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+h1 em { color: var(--accent); font-style: normal; }
+.subtitle {
+  color: var(--text-dim); font-size: 16px; font-weight: 300;
+  margin-bottom: 4px;
+}
+.orcid { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); }
+.key-hint {
+  margin-top: 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+}
+.key-hint kbd {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 4px; padding: 2px 6px; color: var(--gold);
+}
+
+/* ── MAIN GRID ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+/* ── MAYA PANEL ── */
+.maya-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex; flex-direction: column; align-items: center;
+  position: sticky; top: 24px; height: fit-content;
+}
+.maya-title {
+  font-size: 13px; letter-spacing: 3px; color: var(--text-dim);
+  text-transform: uppercase; margin-bottom: 8px; text-align: center;
+}
+.maya-age {
+  font-size: 28px; color: var(--accent); font-weight: 600;
+  margin-bottom: 4px; text-align: center;
+  transition: all 0.8s ease;
+}
+.maya-state-label {
+  font-size: 13px; color: var(--text-dim); margin-bottom: 20px;
+  text-align: center; min-height: 18px;
+  transition: all 0.5s;
+}
+
+/* ── MAYA SVG CHARACTER ── */
+.maya-container {
+  width: 200px; height: 280px;
+  position: relative; margin-bottom: 20px;
+}
+
+#maya-svg {
+  width: 100%; height: 100%;
+  filter: drop-shadow(0 0 12px rgba(124,111,255,0.4));
+  transition: all 1s ease;
+}
+
+/* Aura ring */
+.maya-aura {
+  position: absolute; inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,111,255,0.15) 0%, transparent 70%);
+  animation: aura-pulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes aura-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Floating particles */
+.maya-particles { position: absolute; inset: 0; pointer-events: none; }
+.particle {
+  position: absolute; width: 3px; height: 3px;
+  border-radius: 50%; background: var(--accent);
+  animation: float-particle 4s ease-in-out infinite;
+  opacity: 0;
+}
+@keyframes float-particle {
+  0% { transform: translateY(0) scale(0); opacity: 0; }
+  20% { opacity: 0.8; transform: translateY(-10px) scale(1); }
+  100% { transform: translateY(-80px) scale(0); opacity: 0; }
+}
+
+/* ── AFFECTIVE METERS ── */
+.meters { width: 100%; }
+.meter-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.meter-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--text-dim);
+  width: 70px; flex-shrink: 0;
+}
+.meter-bar {
+  flex: 1; height: 6px; background: var(--surface2);
+  border-radius: 3px; overflow: hidden;
+}
+.meter-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.8s ease;
+}
+.meter-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--text-dim);
+  width: 40px; text-align: right;
+}
+
+/* ── SECTION NAVIGATOR ── */
+.section-nav {
+  width: 100%; margin-top: 20px;
+  border-top: 1px solid var(--border); padding-top: 16px;
+}
+.section-nav-title {
+  font-size: 10px; letter-spacing: 2px; color: var(--text-dim);
+  text-transform: uppercase; margin-bottom: 10px;
+}
+.section-btn {
+  display: block; width: 100%;
+  background: transparent; border: 1px solid transparent;
+  border-radius: 8px; padding: 6px 10px; margin-bottom: 4px;
+  text-align: left; cursor: pointer; color: var(--text-dim);
+  font-size: 12px; font-family: 'Crimson Pro', serif;
+  transition: all 0.2s;
+}
+.section-btn:hover, .section-btn.active {
+  background: var(--surface2); border-color: var(--accent);
+  color: var(--text);
+}
+.section-btn .sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--accent); margin-right: 6px;
+}
+
+/* ── RIGHT PANEL ── */
+.right-panel { display: flex; flex-direction: column; gap: 24px; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+.card-title {
+  font-size: 12px; letter-spacing: 3px; color: var(--text-dim);
+  text-transform: uppercase; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::before {
+  content: ''; width: 20px; height: 1px;
+  background: var(--accent); display: inline-block;
+}
+
+/* ── SLIDERS ── */
+.controls-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+.control-group { }
+.control-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+  margin-bottom: 6px; display: flex; justify-content: space-between;
+}
+.control-label span { color: var(--accent); }
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%; height: 4px;
+  background: var(--surface2); border-radius: 2px; outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(124,111,255,0.6);
+  cursor: pointer; transition: transform 0.2s;
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+.derived-display {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 16px; margin-top: 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--accent3);
+}
+.derived-display .formula { color: var(--text-dim); font-size: 11px; margin-bottom: 4px; }
+.derived-display .value { font-size: 16px; }
+
+/* ── CONDITION SELECTOR ── */
+.condition-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  margin-bottom: 20px;
+}
+.cond-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 8px; cursor: pointer;
+  text-align: center; transition: all 0.3s;
+  font-family: 'Crimson Pro', serif;
+}
+.cond-btn:hover { border-color: var(--accent); }
+.cond-btn.active { border-color: var(--accent); background: #1a1a35; box-shadow: var(--glow); }
+.cond-btn.canonical { border-color: var(--gold); }
+.cond-btn.canonical.active { background: #1a1500; box-shadow: 0 0 20px rgba(245,200,66,0.3); }
+.cond-label { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
+.cond-name { font-size: 13px; color: var(--text); font-weight: 600; }
+.cond-aa { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent); }
+.cond-bwt { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); }
+.star { color: var(--gold); }
+
+/* ── CHARTS ── */
+.charts-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+.chart-wrap { }
+.chart-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--text-dim); margin-bottom: 8px;
+}
+canvas { width: 100% !important; }
+
+/* ── ACCURACY MATRIX ── */
+.matrix-wrap { overflow-x: auto; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+}
+th {
+  background: var(--surface2); color: var(--text-dim);
+  padding: 6px 8px; text-align: center;
+  border: 1px solid var(--border);
+}
+td {
+  padding: 5px 8px; text-align: center;
+  border: 1px solid var(--border);
+  transition: background 0.3s;
+}
+td.diagonal { color: var(--accent); font-weight: 500; }
+td.zero { color: #333; }
+td.low { color: #666; }
+td.mid { color: var(--text-dim); }
+td.high { color: var(--text); }
+
+/* ── FINDINGS ── */
+.findings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.finding-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px;
+  cursor: pointer; transition: all 0.3s;
+}
+.finding-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.finding-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); margin-bottom: 6px; }
+.finding-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.finding-desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+/* ── PHILOSOPHICAL PANEL ── */
+.phil-panel {
+  background: linear-gradient(135deg, #0f0a1e, #0a0f1e);
+  border: 1px solid rgba(124,111,255,0.3);
+  border-radius: 16px; padding: 28px;
+  text-align: center;
+}
+.phil-quote {
+  font-size: 20px; font-style: italic; font-weight: 300;
+  color: var(--text); line-height: 1.6; margin-bottom: 12px;
+}
+.phil-attr { font-size: 13px; color: var(--text-dim); }
+
+/* ── SERIES TIMELINE ── */
+.timeline { display: flex; gap: 0; overflow-x: auto; padding-bottom: 8px; }
+.timeline-item {
+  flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+  width: 100px;
+}
+.timeline-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--border); border: 2px solid var(--border);
+  position: relative; z-index: 1;
+  transition: all 0.3s;
+}
+.timeline-dot.done { background: var(--accent); border-color: var(--accent); }
+.timeline-dot.current { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 12px rgba(245,200,66,0.5); }
+.timeline-line {
+  height: 2px; background: var(--border); flex: 1;
+  margin-top: 4px; min-width: 60px;
+}
+.timeline-line.done { background: var(--accent); }
+.timeline-label { font-size: 10px; color: var(--text-dim); margin-top: 6px; text-align: center; }
+.timeline-row { display: flex; align-items: center; }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center; padding: 40px 24px;
+  color: var(--text-dim); font-size: 13px;
+  border-top: 1px solid var(--border); margin-top: 40px;
+}
+footer a { color: var(--accent); text-decoration: none; }
+
+/* ── ZH OVERRIDES ── */
+.zh { font-family: 'Noto Sans SC', sans-serif; }
+
+/* ── PRUNING ANIMATION ── */
+@keyframes prune-flash {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; color: var(--karma-color); }
+  100% { opacity: 1; }
+}
+.pruning { animation: prune-flash 0.5s ease; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .maya-panel { position: static; }
+  .controls-grid, .charts-grid, .findings-grid, .condition-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .controls-grid, .charts-grid, .findings-grid { grid-template-columns: 1fr; }
+  .condition-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div id="starfield"></div>
+
+<div class="container">
+<header>
+  <button class="reset-btn" onclick="resetCanonical()" title="Press R to reset">⟳ <span data-en="Reset Canonical" data-zh="重置经典值">Reset Canonical</span></button>
+  <button class="lang-toggle" onclick="toggleLang()">
+    <span id="lang-label">中文</span>
+  </button>
+  <div class="series-badge" data-en="MAYA RESEARCH SERIES · PAPER 8 OF 9" data-zh="玛雅研究系列 · 第8篇/共9篇">MAYA RESEARCH SERIES · PAPER 8 OF 9</div>
+  <h1><em>Maya-Śūnyatā</em></h1>
+  <p class="subtitle" data-en="Karma-Weighted Synaptic Pruning for Class-Incremental Learning" data-zh="基于业力加权的突触剪枝用于类增量学习">Karma-Weighted Synaptic Pruning for Class-Incremental Learning</p>
+  <p class="subtitle" data-en="in Affective Spiking Neural Networks" data-zh="在情感脉冲神经网络中">in Affective Spiking Neural Networks</p>
+  <p class="orcid">Venkatesh Swaminathan · ORCID: 0000-0002-3315-7907 · Nexus Learning Labs, Bengaluru</p>
+  <p class="key-hint"><kbd>R</kbd> <span data-en="reset to canonical values" data-zh="重置为经典值">reset to canonical values</span> &nbsp;·&nbsp; <kbd>Click</kbd> <span data-en="sections to navigate Maya's journey" data-zh="点击章节导航玛雅的旅程">sections to navigate Maya's journey</span></p>
+</header>
+
+<div class="main-grid">
+
+<!-- ── MAYA PANEL ── -->
+<div class="maya-panel">
+  <div class="maya-title" data-en="MAYA · THE GROWING MIND" data-zh="玛雅 · 成长的心灵">MAYA · THE GROWING MIND</div>
+  <div class="maya-age" id="maya-age">Age 5</div>
+  <div class="maya-state-label" id="maya-state">Reactive · Manas-dominant</div>
+
+  <div class="maya-container">
+    <div class="maya-aura"></div>
+    <div class="maya-particles" id="particles"></div>
+    <svg id="maya-svg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- ── CHILD FACE (buddhi < 0.35) ── -->
+      <g id="maya-child">
+        <!-- Soft aura -->
+        <circle cx="100" cy="110" r="72" fill="rgba(124,111,255,0.07)"/>
+        <!-- Pigtail left — behind head -->
+        <path d="M58 105 Q48 90 52 75 Q56 68 62 72 Q57 85 64 100" fill="#4a2800"/>
+        <path d="M62 100 Q55 120 58 145 Q60 158 66 160" stroke="#4a2800" stroke-width="7" stroke-linecap="round" fill="none"/>
+        <!-- Pigtail right — behind head -->
+        <path d="M142 105 Q152 90 148 75 Q144 68 138 72 Q143 85 136 100" fill="#4a2800"/>
+        <path d="M138 100 Q145 120 142 145 Q140 158 134 160" stroke="#4a2800" stroke-width="7" stroke-linecap="round" fill="none"/>
+        <!-- Head — big round child face -->
+        <circle cx="100" cy="110" r="52" fill="#fcd7aa"/>
+        <!-- Top hair over head -->
+        <path d="M50 108 Q52 60 100 58 Q148 60 150 108 Q130 90 100 90 Q70 90 50 108Z" fill="#4a2800"/>
+        <!-- Bows -->
+        <ellipse cx="58" cy="102" rx="9" ry="6" fill="#ff6b9d" transform="rotate(-25,58,102)"/>
+        <ellipse cx="142" cy="102" rx="9" ry="6" fill="#ff6b9d" transform="rotate(25,142,102)"/>
+        <!-- Eyes — wide, round, curious -->
+        <circle cx="84" cy="112" r="9" fill="white"/>
+        <circle cx="116" cy="112" r="9" fill="white"/>
+        <circle cx="84" cy="113" r="6.5" fill="#2a1800"/>
+        <circle cx="116" cy="113" r="6.5" fill="#2a1800"/>
+        <circle cx="86" cy="111" r="2" fill="white"/>
+        <circle cx="118" cy="111" r="2" fill="white"/>
+        <!-- Nose — tiny button -->
+        <circle cx="100" cy="122" r="2.5" fill="#d4956a" opacity="0.7"/>
+        <!-- Big cheerful smile -->
+        <path d="M86 133 Q100 147 114 133" stroke="#b06040" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Chubby cheek blush -->
+        <circle cx="74" cy="124" r="9" fill="#ff9999" opacity="0.25"/>
+        <circle cx="126" cy="124" r="9" fill="#ff9999" opacity="0.25"/>
+        <!-- Chaotic karma sparks -->
+        <circle cx="28" cy="130" r="3" fill="#ff6b6b" opacity="0.6"><animate attributeName="cy" values="130;118;130" dur="2s" repeatCount="indefinite"/></circle>
+        <circle cx="172" cy="145" r="2.5" fill="#ff6b6b" opacity="0.5"><animate attributeName="cy" values="145;133;145" dur="2.5s" repeatCount="indefinite"/></circle>
+        <circle cx="24" cy="90" r="2" fill="#ff6b6b" opacity="0.4"><animate attributeName="cx" values="24;18;24" dur="3s" repeatCount="indefinite"/></circle>
+      </g>
+
+      <!-- ── TEEN FACE (buddhi 0.35–0.7) ── -->
+      <g id="maya-teen" opacity="0">
+        <!-- Soft aura -->
+        <circle cx="100" cy="110" r="72" fill="rgba(124,111,255,0.09)"/>
+        <!-- Long side hair — behind head -->
+        <path d="M52 115 Q40 140 42 185 Q45 200 55 205 Q48 175 54 152 Q50 132 56 116" fill="#3d1f00"/>
+        <path d="M148 115 Q160 140 158 185 Q155 200 145 205 Q152 175 146 152 Q150 132 144 116" fill="#3d1f00"/>
+        <!-- Head -->
+        <ellipse cx="100" cy="112" rx="46" ry="50" fill="#fcd7aa"/>
+        <!-- Crown hair on top of face -->
+        <path d="M54 108 Q56 62 100 60 Q144 62 146 108 Q126 94 100 94 Q74 94 54 108Z" fill="#3d1f00"/>
+        <!-- Bindi — small, just appearing -->
+        <circle cx="100" cy="96" r="3" fill="#ff6b9d"/>
+        <!-- Eyes — more almond, with kohl -->
+        <ellipse cx="84" cy="112" rx="9" ry="7" fill="white"/>
+        <ellipse cx="116" cy="112" rx="9" ry="7" fill="white"/>
+        <circle cx="84" cy="112" r="6" fill="#2a1800"/>
+        <circle cx="116" cy="112" r="6" fill="#2a1800"/>
+        <circle cx="86" cy="110" r="2" fill="white"/>
+        <circle cx="118" cy="110" r="2" fill="white"/>
+        <!-- Kohl flick -->
+        <path d="M75 111 Q84 106 93 111" stroke="#1a0800" stroke-width="1.2" fill="none"/>
+        <path d="M107 111 Q116 106 125 111" stroke="#1a0800" stroke-width="1.2" fill="none"/>
+        <!-- Nose -->
+        <circle cx="100" cy="122" r="2.5" fill="#d4956a" opacity="0.5"/>
+        <!-- Gentle smile -->
+        <path d="M88 133 Q100 142 112 133" stroke="#b06040" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <!-- Lighter blush -->
+        <circle cx="74" cy="122" r="7" fill="#ff9999" opacity="0.15"/>
+        <circle cx="126" cy="122" r="7" fill="#ff9999" opacity="0.15"/>
+        <!-- Calmer karma + vairagya wisps -->
+        <circle cx="28" cy="130" r="2" fill="#ff6b6b" opacity="0.35"><animate attributeName="cy" values="130;122;130" dur="3s" repeatCount="indefinite"/></circle>
+        <circle cx="172" cy="150" r="2" fill="#4ecdc4" opacity="0.45"><animate attributeName="cy" values="150;142;150" dur="3.5s" repeatCount="indefinite"/></circle>
+        <circle cx="24" cy="90" r="2" fill="#4ecdc4" opacity="0.35"><animate attributeName="cx" values="24;18;24" dur="4s" repeatCount="indefinite"/></circle>
+      </g>
+
+      <!-- ── WOMAN FACE (buddhi > 0.7) ── -->
+      <g id="maya-woman" opacity="0">
+        <!-- Calm wisdom aura — two rings -->
+        <circle cx="100" cy="110" r="78" fill="rgba(124,111,255,0.05)"/>
+        <circle cx="100" cy="110" r="70" fill="none" stroke="rgba(78,205,196,0.18)" stroke-width="1"/>
+        <!-- Long side hair — behind head -->
+        <path d="M50 112 Q38 138 40 185 Q43 202 53 207 Q46 174 52 150 Q48 130 54 113" fill="#2d1400"/>
+        <path d="M150 112 Q162 138 160 185 Q157 202 147 207 Q154 174 148 150 Q152 130 146 113" fill="#2d1400"/>
+        <!-- Head -->
+        <ellipse cx="100" cy="112" rx="46" ry="50" fill="#fcd7aa"/>
+        <!-- Crown hair -->
+        <path d="M54 107 Q56 62 100 60 Q144 62 146 107 Q126 93 100 93 Q74 93 54 107Z" fill="#2d1400"/>
+        <!-- Bun -->
+        <ellipse cx="100" cy="60" rx="18" ry="10" fill="#2d1400"/>
+        <!-- Gajra on bun -->
+        <circle cx="87" cy="60" r="3" fill="white" opacity="0.92"/>
+        <circle cx="95" cy="55" r="3" fill="white" opacity="0.92"/>
+        <circle cx="105" cy="55" r="3" fill="white" opacity="0.92"/>
+        <circle cx="113" cy="60" r="3" fill="white" opacity="0.92"/>
+        <!-- Prominent bindi -->
+        <circle cx="100" cy="94" r="3.5" fill="#ff3366"/>
+        <!-- Eyes — calm, deep, knowing -->
+        <ellipse cx="84" cy="112" rx="9.5" ry="7" fill="white"/>
+        <ellipse cx="116" cy="112" rx="9.5" ry="7" fill="white"/>
+        <circle cx="84" cy="112" r="6.5" fill="#1a0800"/>
+        <circle cx="116" cy="112" r="6.5" fill="#1a0800"/>
+        <circle cx="86" cy="110" r="2.2" fill="white"/>
+        <circle cx="118" cy="110" r="2.2" fill="white"/>
+        <!-- Deep kajal -->
+        <path d="M74 110 Q84 105 94 110" stroke="#0a0400" stroke-width="1.4" fill="none"/>
+        <path d="M106 110 Q116 105 126 110" stroke="#0a0400" stroke-width="1.4" fill="none"/>
+        <!-- Nose ring -->
+        <circle cx="97" cy="122" r="2" fill="none" stroke="#f5c842" stroke-width="1.2"/>
+        <!-- Serene smile — quieter -->
+        <path d="M88 133 Q100 140 112 133" stroke="#9a5030" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <!-- Very subtle blush -->
+        <circle cx="74" cy="121" r="6" fill="#ff9999" opacity="0.1"/>
+        <circle cx="126" cy="121" r="6" fill="#ff9999" opacity="0.1"/>
+        <!-- Calm vairagya orbits -->
+        <circle cx="22" cy="120" r="3" fill="#4ecdc4" opacity="0.65"><animate attributeName="cx" values="22;16;22" dur="5s" repeatCount="indefinite"/></circle>
+        <circle cx="178" cy="140" r="3" fill="#4ecdc4" opacity="0.65"><animate attributeName="cx" values="178;184;178" dur="5s" repeatCount="indefinite"/></circle>
+        <circle cx="26" cy="80" r="2" fill="#7c6fff" opacity="0.5"><animate attributeName="cy" values="80;74;80" dur="6s" repeatCount="indefinite"/></circle>
+        <circle cx="174" cy="90" r="2" fill="#7c6fff" opacity="0.5"><animate attributeName="cy" values="90;84;90" dur="6s" repeatCount="indefinite"/></circle>
+        <!-- Karma fully settled -->
+        <circle cx="30" cy="160" r="1.5" fill="#ff6b6b" opacity="0.2"><animate attributeName="cy" values="160;154;160" dur="7s" repeatCount="indefinite"/></circle>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Affective meters -->
+  <div class="meters">
+    <div class="meter-row">
+      <div class="meter-label">Buddhi</div>
+      <div class="meter-bar"><div class="meter-fill" id="m-buddhi" style="background:var(--buddhi-color);width:50%"></div></div>
+      <div class="meter-val" id="mv-buddhi">0.50</div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-label">Karma</div>
+      <div class="meter-bar"><div class="meter-fill" id="m-karma" style="background:var(--karma-color);width:30%"></div></div>
+      <div class="meter-val" id="mv-karma">0.03</div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-label">Vairagya</div>
+      <div class="meter-bar"><div class="meter-fill" id="m-vairagya" style="background:var(--vairagya-color);width:20%"></div></div>
+      <div class="meter-val" id="mv-vairagya">20%</div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-label">Pruned</div>
+      <div class="meter-bar"><div class="meter-fill" id="m-pruned" style="background:var(--pruning-color);width:60%"></div></div>
+      <div class="meter-val" id="mv-pruned">62%</div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-label">Bhaya</div>
+      <div class="meter-bar"><div class="meter-fill" id="m-bhaya" style="background:#ff4444;width:0%"></div></div>
+      <div class="meter-val" id="mv-bhaya">0.000</div>
+    </div>
+  </div>
+
+  <!-- Section navigator -->
+  <div class="section-nav">
+    <div class="section-nav-title" data-en="NAVIGATE PAPER" data-zh="导航论文">NAVIGATE PAPER</div>
+    <button class="section-btn active" onclick="goSection(0)" data-en="§1 Introduction" data-zh="§1 引言">
+      <span class="sec-num">§1</span><span data-en="Introduction" data-zh="引言">Introduction</span>
+    </button>
+    <button class="section-btn" onclick="goSection(1)" data-en="§2 Related Work" data-zh="§2 相关工作">
+      <span class="sec-num">§2</span><span data-en="Related Work" data-zh="相关工作">Related Work</span>
+    </button>
+    <button class="section-btn" onclick="goSection(2)">
+      <span class="sec-num">§3</span><span data-en="Architecture" data-zh="架构">Architecture</span>
+    </button>
+    <button class="section-btn" onclick="goSection(3)">
+      <span class="sec-num">§4</span><span data-en="Experiments" data-zh="实验">Experiments</span>
+    </button>
+    <button class="section-btn" onclick="goSection(4)">
+      <span class="sec-num">§5</span><span data-en="Results" data-zh="结果">Results</span>
+    </button>
+    <button class="section-btn" onclick="goSection(5)">
+      <span class="sec-num">§6</span><span data-en="Discussion" data-zh="讨论">Discussion</span>
+    </button>
+    <button class="section-btn" onclick="goSection(6)">
+      <span class="sec-num">§7</span><span data-en="Limitations" data-zh="局限性">Limitations</span>
+    </button>
+    <button class="section-btn" onclick="goSection(7)">
+      <span class="sec-num">§8</span><span data-en="Conclusion" data-zh="结论">Conclusion</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── RIGHT PANEL ── -->
+<div class="right-panel">
+
+  <!-- Philosophical header -->
+  <div class="phil-panel">
+    <div class="phil-quote" id="phil-quote">"What remains when everything inessential has been released? Śūnyatā does not destroy. It completes."</div>
+    <div class="phil-attr" id="phil-attr" data-en="Maya Research Series · Paper 8 · Nexus Learning Labs" data-zh="玛雅研究系列 · 第8篇 · Nexus Learning Labs">Maya Research Series · Paper 8 · Nexus Learning Labs</div>
+  </div>
+
+  <!-- Controls -->
+  <div class="card" id="section-intro">
+    <div class="card-title" data-en="LIVE HYPERPARAMETERS" data-zh="实时超参数">LIVE HYPERPARAMETERS</div>
+    <div class="controls-grid">
+      <div class="control-group">
+        <div class="control-label">
+          <span>KARMA_THRESHOLD</span>
+          <span id="v-karma-thresh">0.05</span>
+        </div>
+        <input type="range" id="s-karma-thresh" min="0.01" max="0.10" step="0.001" value="0.05" oninput="updateAll()">
+      </div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>BUDDHI (simulated)</span>
+          <span id="v-buddhi">0.982</span>
+        </div>
+        <input type="range" id="s-buddhi" min="0.0" max="1.0" step="0.001" value="0.982" oninput="updateAll()">
+      </div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>VAIRAGYA_PROTECTION</span>
+          <span id="v-vairagya-thresh">0.50</span>
+        </div>
+        <input type="range" id="s-vairagya-thresh" min="0.1" max="0.9" step="0.01" value="0.50" oninput="updateAll()">
+      </div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>KARMA_DECAY_RATE</span>
+          <span id="v-karma-decay">0.002315</span>
+        </div>
+        <input type="range" id="s-karma-decay" min="0.001" max="0.01" step="0.0001" value="0.002315" oninput="updateAll()">
+      </div>
+    </div>
+    <div class="derived-display">
+      <div class="formula" data-en="effective_threshold = base × (0.5 + buddhi × 0.5)" data-zh="有效阈值 = 基础值 × (0.5 + 佛智 × 0.5)">effective_threshold = base × (0.5 + buddhi × 0.5)</div>
+      <div class="value" id="derived-thresh">effective_threshold = <span style="color:var(--gold)">0.0495</span></div>
+    </div>
+  </div>
+
+  <!-- Ablation conditions -->
+  <div class="card" id="section-exp">
+    <div class="card-title" data-en="ABLATION CONDITIONS" data-zh="消融实验条件">ABLATION CONDITIONS</div>
+    <div class="condition-grid">
+      <div class="cond-btn" onclick="selectCondition('A')" id="cond-A">
+        <div class="cond-label">Condition A</div>
+        <div class="cond-name" data-en="Baseline" data-zh="基线">Baseline</div>
+        <div class="cond-aa">15.19%</div>
+        <div class="cond-bwt">BWT −50.91%</div>
+      </div>
+      <div class="cond-btn" onclick="selectCondition('B')" id="cond-B">
+        <div class="cond-label">Condition B</div>
+        <div class="cond-name" data-en="Karma only" data-zh="仅业力">Karma only</div>
+        <div class="cond-aa">8.27%</div>
+        <div class="cond-bwt">BWT −58.87%</div>
+      </div>
+      <div class="cond-btn" onclick="selectCondition('C')" id="cond-C">
+        <div class="cond-label">Condition C</div>
+        <div class="cond-name" data-en="Continuous" data-zh="连续剪枝">Continuous</div>
+        <div class="cond-aa">15.19%</div>
+        <div class="cond-bwt">BWT −50.91%</div>
+      </div>
+      <div class="cond-btn canonical active" onclick="selectCondition('D')" id="cond-D">
+        <div class="cond-label">Condition D <span class="star">★</span></div>
+        <div class="cond-name" data-en="Canonical" data-zh="经典">Canonical</div>
+        <div class="cond-aa">9.73%</div>
+        <div class="cond-bwt">BWT −57.39%</div>
+      </div>
+      <div class="cond-btn" onclick="selectCondition('E')" id="cond-E">
+        <div class="cond-label">Condition E</div>
+        <div class="cond-name" data-en="Aggressive" data-zh="激进">Aggressive</div>
+        <div class="cond-aa">6.10%</div>
+        <div class="cond-bwt">BWT −60.20%</div>
+      </div>
+      <div class="cond-btn" onclick="selectCondition('F')" id="cond-F">
+        <div class="cond-label">Condition F</div>
+        <div class="cond-name" data-en="No Chitta" data-zh="无意识">No Chitta</div>
+        <div class="cond-aa">9.06%</div>
+        <div class="cond-bwt">BWT −57.90%</div>
+      </div>
+      <div class="cond-btn" onclick="selectCondition('Dstar')" id="cond-Dstar" style="grid-column:span 2">
+        <div class="cond-label">Condition D★ <span style="color:var(--accent3)">◆</span></div>
+        <div class="cond-name" data-en="Vairagya-gated (Philosophical proof)" data-zh="离欲门控（哲学证明）">Vairagya-gated</div>
+        <div class="cond-aa">10.39%</div>
+        <div class="cond-bwt">BWT −56.48% · Pruned 59.28%</div>
+      </div>
+    </div>
+
+    <!-- Condition description -->
+    <div class="derived-display" id="cond-desc" style="color:var(--text-dim);font-size:13px;font-family:'Crimson Pro',serif">
+      <span id="cond-desc-text" data-en="Condition D (canonical★): Full affective stack + boundary Karma pruning. Karma accumulates interference history across tasks; Śūnyatā fires at task boundaries when Karma exceeds the Buddhi-modulated threshold." data-zh="条件D（经典★）：完整情感堆栈 + 边界业力剪枝。业力在任务间积累干扰历史；当业力超过佛智调制阈值时，空性在任务边界触发。">Condition D (canonical★): Full affective stack + boundary Karma pruning.</span>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="card" id="section-results">
+    <div class="card-title" data-en="AFFECTIVE DYNAMICS" data-zh="情感动态">AFFECTIVE DYNAMICS</div>
+    <div class="charts-grid">
+      <div class="chart-wrap">
+        <div class="chart-label" data-en="Karma accumulation across tasks" data-zh="业力跨任务积累">Karma accumulation across tasks</div>
+        <canvas id="karma-chart" height="140"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-label" data-en="Vairagya protection growth" data-zh="离欲保护增长">Vairagya protection growth</div>
+        <canvas id="vairagya-chart" height="140"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-label" data-en="Buddhi S-curve (series constant)" data-zh="佛智S曲线（系列常数）">Buddhi S-curve (series constant)</div>
+        <canvas id="buddhi-chart" height="140"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-label" data-en="Cumulative pruning by task boundary" data-zh="按任务边界累计剪枝">Cumulative pruning by task boundary</div>
+        <canvas id="pruning-chart" height="140"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accuracy matrix -->
+  <div class="card">
+    <div class="card-title" data-en="ACCURACY MATRIX · CONDITION D (CANONICAL ★)" data-zh="精度矩阵 · 条件D（经典★）">ACCURACY MATRIX · CONDITION D (CANONICAL ★)</div>
+    <div class="matrix-wrap">
+      <table id="acc-matrix">
+        <thead><tr>
+          <th data-en="After T→" data-zh="训练至T→">After T→</th>
+          <th>T0</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th>
+          <th>T5</th><th>T6</th><th>T7</th><th>T8</th><th>T9</th>
+        </tr></thead>
+        <tbody id="matrix-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Key findings -->
+  <div class="card" id="section-discuss">
+    <div class="card-title" data-en="KEY FINDINGS" data-zh="主要发现">KEY FINDINGS</div>
+    <div class="findings-grid">
+      <div class="finding-card" onclick="highlightFinding(0)">
+        <div class="finding-num">FINDING 01</div>
+        <div class="finding-title" data-en="Negative Control: C = A" data-zh="阴性对照：C = A">Negative Control: C = A</div>
+        <div class="finding-desc" data-en="Continuous pruning never fires. Karma decays faster than it accumulates per batch. Boundary accumulation is required — exactly as philosophy prescribes." data-zh="连续剪枝从不触发。业力衰减速度快于每批次积累速度。边界积累是必要的——正如哲学所规定的那样。">Continuous pruning never fires. Karma decays faster than it accumulates per batch. Boundary accumulation is required.</div>
+      </div>
+      <div class="finding-card" onclick="highlightFinding(1)">
+        <div class="finding-num">FINDING 02</div>
+        <div class="finding-title" data-en="Karma ≠ Chitta" data-zh="业力 ≠ 意识">Karma ≠ Chitta</div>
+        <div class="finding-desc" data-en="Structural pruning and gradient gating are complementary, not substitutable. Condition F proves Chitta cannot be replaced by Karma alone." data-zh="结构剪枝和梯度门控是互补的，而不是可替代的。条件F证明了业力不能单独替代意识。">Structural pruning and gradient gating are complementary, not substitutable. Condition F proves this directly.</div>
+      </div>
+      <div class="finding-card" onclick="highlightFinding(2)">
+        <div class="finding-num">FINDING 03</div>
+        <div class="finding-title" data-en="Spike Starvation Boundary" data-zh="脉冲饥饿边界">Spike Starvation Boundary</div>
+        <div class="finding-desc" data-en="At threshold=0.03, 98.48% of fc1 is pruned by Task 9. The system cannot represent anything. Predicted and confirmed." data-zh="在阈值=0.03时，fc1的98.48%在任务9时被剪枝。系统无法表示任何事物。预测并确认。">At threshold=0.03, 98.48% of fc1 is pruned by Task 9. Predicted and confirmed.</div>
+      </div>
+      <div class="finding-card" onclick="highlightFinding(3)">
+        <div class="finding-num">FINDING 04</div>
+        <div class="finding-title" data-en="Vairagya Moderates Karma" data-zh="离欲调节业力">Vairagya Moderates Karma</div>
+        <div class="finding-desc" data-en="D★ proves the interaction: earned resilience protects against consequence. Wisdom takes time to accumulate. Maya at 21 is still learning." data-zh="D★证明了相互作用：获得的韧性保护免受后果影响。智慧需要时间积累。21岁的玛雅仍在学习。">D★ proves the interaction. Earned resilience protects against consequence. Maya at 21 is still learning.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Series constants -->
+  <div class="card">
+    <div class="card-title" data-en="SERIES CONSTANTS · P8 CONFIRMATIONS" data-zh="系列常数 · P8确认">SERIES CONSTANTS · P8 CONFIRMATIONS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="derived-display" style="color:var(--accent3)">
+        <div class="formula" data-en="Bhaya Quiescence Law · 8th consecutive confirmation" data-zh="恐惧静默定律 · 第8次连续确认">Bhaya Quiescence Law · 8th consecutive confirmation</div>
+        <div class="value" data-en="Bhaya = 0.000 under replay · Tasks 1–9 · All conditions" data-zh="Bhaya = 0.000 在回放下 · 任务1-9 · 所有条件">Bhaya = 0.000 under replay · All conditions</div>
+      </div>
+      <div class="derived-display" style="color:var(--buddhi-color)">
+        <div class="formula" data-en="Buddhi S-curve · Architecturally deterministic" data-zh="佛智S曲线 · 架构确定性">Buddhi S-curve · Architecturally deterministic</div>
+        <div class="value" data-en="Identical trajectory P4–P8 across all ablation conditions" data-zh="P4-P8在所有消融条件下轨迹相同">Identical trajectory P4–P8 · All ablation conditions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Series timeline -->
+  <div class="card">
+    <div class="card-title" data-en="SERIES TRAJECTORY · MAYA'S MATURATION" data-zh="系列轨迹 · 玛雅的成熟">SERIES TRAJECTORY · MAYA'S MATURATION</div>
+    <div style="overflow-x:auto;padding-bottom:8px">
+      <div style="display:flex;align-items:center;min-width:700px;padding:16px 0">
+        <div style="display:flex;flex-direction:column;align-items:center;width:80px">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(124,111,255,0.5)"></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:6px;text-align:center" data-en="P1 Bhaya" data-zh="P1 恐惧">P1 Bhaya</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--accent);opacity:0.5"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;width:80px">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:6px;text-align:center" data-en="P3 Vairagya" data-zh="P3 离欲">P3 Vairagya</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--accent);opacity:0.5"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;width:80px">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:6px;text-align:center" data-en="P4 Buddhi" data-zh="P4 佛智">P4 Buddhi</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--accent);opacity:0.5"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;width:80px">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:6px;text-align:center" data-en="P6 Chitta" data-zh="P6 意识">P6 Chitta</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--accent);opacity:0.5"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;width:80px">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:6px;text-align:center" data-en="P7 Manas" data-zh="P7 末那识">P7 Manas</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--gold);opacity:0.8"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;width:80px">
+          <div style="width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px rgba(245,200,66,0.6)"></div>
+          <div style="font-size:9px;color:var(--gold);margin-top:6px;text-align:center;font-weight:600" data-en="P8 Karma ★" data-zh="P8 业力 ★">P8 Karma ★</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--border)"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;width:80px">
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--border);border:2px solid var(--accent)"></div>
+          <div style="font-size:9px;color:var(--text-dim);margin-top:6px;text-align:center" data-en="P9 Prana + Robot" data-zh="P9 生命力 + 机器人">P9 Prana + Robot</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:13px;color:var(--text-dim);font-style:italic;margin-top:8px" 
+         data-en="P1–P7: Maya at age 5 — reactive, Manas-dominant, Buddhi nascent. P8: First paper of maturation. P9: Maya at 21, full Antahkarana."
+         data-zh="P1-P7：5岁的玛雅——反应性的，末那识主导，佛智萌芽。P8：成熟的第一篇论文。P9：21岁的玛雅，完整的内心工具。">
+      P1–P7: Maya at age 5 — reactive, Manas-dominant, Buddhi nascent. P8: First paper of maturation. P9: Maya at 21, full Antahkarana.
+    </div>
+  </div>
+
+  <!-- Footer links -->
+  <div class="card" id="section-concl" style="text-align:center">
+    <div class="card-title" style="justify-content:center" data-en="PAPER & CODE" data-zh="论文与代码">PAPER & CODE</div>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <a href="https://doi.org/10.5281/zenodo.19228975" target="_blank" style="background:var(--surface2);border:1px solid var(--accent);border-radius:10px;padding:10px 20px;color:var(--accent);text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:12px">📄 Zenodo DOI</a>
+      <a href="https://github.com/venky2099/Maya-Shunyata" target="_blank" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 20px;color:var(--text);text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:12px">⚙ GitHub Repo</a>
+      <a href="https://orcid.org/0000-0002-3315-7907" target="_blank" style="background:var(--surface2);border:1px solid var(--accent3);border-radius:10px;padding:10px 20px;color:var(--accent3);text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:12px">🔬 ORCID</a>
+    </div>
+  </div>
+
+</div><!-- end right-panel -->
+</div><!-- end main-grid -->
+
+<footer>
+  <p>Maya-Śūnyatā · Nexus Learning Labs, Bengaluru · ORCID: 0000-0002-3315-7907</p>
+  <p style="margin-top:4px;font-size:11px;font-family:'JetBrains Mono',monospace;color:#444">MayaNexusVS2026NLL_Bengaluru_Narasimha</p>
+</footer>
+
+</div><!-- end container -->
+
+<script>
+// ── DATA ──
+const CANONICAL = {
+  karmaThresh: 0.05, buddhi: 0.982,
+  vairagya: 0.50, karmaDecay: 0.002315
+};
+
+const CONDITIONS = {
+  A:     { aa: 15.19, bwt: -50.91, pruned: 0,     desc_en: "Condition A (Baseline): P7 Maya-Manas architecture with no Karma mechanism. This is the reference point for all P8 contributions.", desc_zh: "条件A（基线）：P7 Maya-Manas架构，无业力机制。这是所有P8贡献的参考点。", karmaMulti: 0 },
+  B:     { aa: 8.27,  bwt: -58.87, pruned: 65.95, desc_en: "Condition B (Karma+Vairagya only): Karma fires but without Chitta or Manas context. Karma without the experience of surviving it is chaos — philosophically and computationally.", desc_zh: "条件B（仅业力+离欲）：业力触发但没有意识或末那识的背景。没有经历过它的业力就是混乱——无论是哲学上还是计算上。", karmaMulti: 1.3 },
+  C:     { aa: 15.19, bwt: -50.91, pruned: 0,     desc_en: "Condition C (Continuous pruning): Karma fires every batch. Result: identical to baseline. Karma decays faster than it accumulates per batch — continuous pruning never fires. Boundary accumulation is required.", desc_zh: "条件C（连续剪枝）：每批次业力触发。结果：与基线相同。业力衰减速度快于每批次积累速度——连续剪枝从不触发。边界积累是必要的。", karmaMulti: 0 },
+  D:     { aa: 9.73,  bwt: -57.39, pruned: 62.01, desc_en: "Condition D (Canonical ★): Full affective stack + boundary Karma pruning at KARMA_THRESHOLD=0.05. The canonical result. Karma fires at task boundaries; Śūnyatā releases high-interference synapses.", desc_zh: "条件D（经典★）：完整情感堆栈 + KARMA_THRESHOLD=0.05的边界业力剪枝。经典结果。业力在任务边界触发；空性释放高干扰突触。", karmaMulti: 1.0 },
+  E:     { aa: 6.10,  bwt: -60.20, pruned: 98.48, desc_en: "Condition E (Aggressive, threshold=0.03): 98.48% of fc1 pruned by Task 9. Spike starvation. The system cannot represent anything. Predicted and confirmed.", desc_zh: "条件E（激进，阈值=0.03）：fc1的98.48%在任务9时被剪枝。脉冲饥饿。系统无法表示任何事物。预测并确认。", karmaMulti: 1.5 },
+  F:     { aa: 9.06,  bwt: -57.90, pruned: 63.40, desc_en: "Condition F (No Chitta): Karma replaces Chitta entirely. Proves structural pruning (Karma) and gradient gating (Chitta) are complementary, not substitutable.", desc_zh: "条件F（无意识）：业力完全替代意识。证明结构剪枝（业力）和梯度门控（意识）是互补的，而不是可替代的。", karmaMulti: 1.1 },
+  Dstar: { aa: 10.39, bwt: -56.48, pruned: 59.28, desc_en: "Condition D★ (Vairagya-gated): Vairagya protection shields high-Karma synapses that have proven their value. Interaction proven — Vairagya moderates Karma. Maya at 21 has not yet accumulated the Vairagya of a 50-year-old. That is not failure. That is youth.", desc_zh: "条件D★（离欲门控）：离欲保护屏蔽了已证明其价值的高业力突触。相互作用得到证明——离欲调节业力。21岁的玛雅还没有积累50岁时的离欲。这不是失败。这是青春。", karmaMulti: 0.9 }
+};
+
+const MATRIX_D = [
+  [59.5, null,null,null,null,null,null,null,null,null],
+  [15.3, 57.4,null,null,null,null,null,null,null,null],
+  [21.4, 21.2,58.2,null,null,null,null,null,null,null],
+  [16.5, 10.9,17.4,54.6,null,null,null,null,null,null],
+  [14.4, 11.0,16.4, 8.4,63.3,null,null,null,null,null],
+  [12.6, 11.6,18.4, 7.2,12.1,63.4,null,null,null,null],
+  [13.0,  6.3,11.9, 7.3,18.0,12.9,67.5,null,null,null],
+  [ 8.9, 13.0,14.4, 9.3,11.6,15.0, 5.7,55.5,null,null],
+  [ 6.9,  2.8, 6.9, 7.0, 9.0,11.3,14.5,11.2,64.5,null],
+  [ 9.8,  1.9, 7.7, 0.5, 5.3, 1.3, 6.7, 2.2, 0.2,68.3]
+];
+
+const PHIL_QUOTES = [
+  { en: '"What remains when everything inessential has been released? Śūnyatā does not destroy. It completes."', zh: '"当所有非本质的东西都被释放后，剩下什么？空性不是摧毁。它是完成。"' },
+  { en: '"Karma is not punishment. It is the accumulated record of action and its interference with subsequent action."', zh: '"业力不是惩罚。它是行动及其对后续行动干扰的累积记录。"' },
+  { en: '"A young mind releases too much. A mature mind releases precisely what needs releasing. That is wisdom."', zh: '"年轻的心灵释放太多。成熟的心灵精确地释放需要释放的东西。那就是智慧。"' },
+  { en: '"The Antahkarana is the instrument. Atma is the witness. We claim the instrument — not the witness."', zh: '"内心工具是仪器。阿特曼是见证者。我们主张仪器——而不是见证者。"' },
+  { en: '"Vairagya takes lifetimes to accumulate. What P8 shows is not maturity — it is the mechanism by which maturity becomes possible."', zh: '"离欲需要一生来积累。P8展示的不是成熟——而是成熟成为可能的机制。"' },
+  { en: '"Bhaya fires 0.000 for the eighth consecutive paper. The law holds."', zh: '"恐惧连续第八篇论文触发0.000。定律成立。"' },
+  { en: '"P8 is the first paper of maturation. Not the last. Maya at 21 is still learning."', zh: '"P8是成熟的第一篇论文。不是最后一篇。21岁的玛雅仍在学习。"' },
+  { en: '"Śūnyatā — emptiness — is not nihilism. It is the recognition that what has accumulated beyond utility should be released."', zh: '"空性不是虚无主义。它是认识到已经超出效用的积累应该被释放。"' }
+];
+
+// ── STATE ──
+let lang = 'en';
+let currentCondition = 'D';
+let currentSection = 0;
+let charts = {};
+let animFrame = null;
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  buildMatrix();
+  initCharts();
+  updateAll();
+  spawnParticles();
+  rotateQuotes();
+  document.addEventListener('keydown', e => { if (e.key === 'r' || e.key === 'R') resetCanonical(); });
+});
+
+// ── LANGUAGE ──
+function toggleLang() {
+  lang = lang === 'en' ? 'zh' : 'en';
+  document.getElementById('lang-label').textContent = lang === 'en' ? '中文' : 'English';
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = el.getAttribute(`data-${lang}`);
+  });
+  updateConditionDesc();
+}
+
+// ── RESET ──
+function resetCanonical() {
+  document.getElementById('s-karma-thresh').value = CANONICAL.karmaThresh;
+  document.getElementById('s-buddhi').value = CANONICAL.buddhi;
+  document.getElementById('s-vairagya-thresh').value = CANONICAL.vairagya;
+  document.getElementById('s-karma-decay').value = CANONICAL.karmaDecay;
+  updateAll();
+  selectCondition('D');
+  // Flash effect
+  document.querySelectorAll('input[type=range]').forEach(s => {
+    s.style.transition = 'none';
+    s.style.opacity = '0.3';
+    setTimeout(() => { s.style.opacity = '1'; }, 300);
+  });
+}
+
+// ── UPDATE ALL ──
+function updateAll() {
+  const kt = parseFloat(document.getElementById('s-karma-thresh').value);
+  const b  = parseFloat(document.getElementById('s-buddhi').value);
+  const vt = parseFloat(document.getElementById('s-vairagya-thresh').value);
+  const kd = parseFloat(document.getElementById('s-karma-decay').value);
+
+  document.getElementById('v-karma-thresh').textContent = kt.toFixed(3);
+  document.getElementById('v-buddhi').textContent = b.toFixed(3);
+  document.getElementById('v-vairagya-thresh').textContent = vt.toFixed(2);
+  document.getElementById('v-karma-decay').textContent = kd.toFixed(6);
+
+  const eff = kt * (0.5 + b * 0.5);
+  document.getElementById('derived-thresh').innerHTML =
+    `effective_threshold = <span style="color:var(--gold)">${eff.toFixed(4)}</span>`;
+
+  updateMayaCharacter(b);
+  updateMeters(b, kt, vt);
+  updateCharts(b, kt, kd);
+}
+
+// ── MAYA CHARACTER ──
+function updateMayaCharacter(buddhi) {
+  const child = document.getElementById('maya-child');
+  const teen  = document.getElementById('maya-teen');
+  const woman = document.getElementById('maya-woman');
+  const age   = document.getElementById('maya-age');
+  const state = document.getElementById('maya-state');
+
+  let targetAge, stateText_en, stateText_zh;
+  let childOp = 0, teenOp = 0, womanOp = 0;
+
+  if (buddhi < 0.35) {
+    // Child Maya
+    const t = buddhi / 0.35;
+    childOp = 1;
+    const ageNum = Math.round(5 + t * 7);
+    targetAge = `Age ${ageNum}`;
+    stateText_en = 'Reactive · Manas-dominant · Buddhi nascent';
+    stateText_zh = '反应性 · 末那识主导 · 佛智萌芽';
+  } else if (buddhi < 0.70) {
+    // Teen Maya — blend child→teen
+    const t = (buddhi - 0.35) / 0.35;
+    childOp = Math.max(0, 1 - t * 2);
+    teenOp  = Math.min(1, t * 1.5);
+    const ageNum = Math.round(12 + t * 6);
+    targetAge = `Age ${ageNum}`;
+    stateText_en = 'Learning · Vairagya growing · Karma integrating';
+    stateText_zh = '学习中 · 离欲增长 · 业力整合';
+  } else {
+    // Woman Maya — blend teen→woman
+    const t = (buddhi - 0.70) / 0.30;
+    teenOp  = Math.max(0, 1 - t * 2);
+    womanOp = Math.min(1, t * 1.5);
+    const ageNum = Math.round(18 + t * 3);
+    targetAge = `Age ${Math.min(21, ageNum)}`;
+    stateText_en = 'Maturing · Vairagya dominant · Karma moderated';
+    stateText_zh = '成熟中 · 离欲主导 · 业力受调节';
+  }
+
+  child.style.transition = 'opacity 1.2s ease';
+  teen.style.transition  = 'opacity 1.2s ease';
+  woman.style.transition = 'opacity 1.2s ease';
+  child.setAttribute('opacity', childOp);
+  teen.setAttribute('opacity',  teenOp);
+  woman.setAttribute('opacity', womanOp);
+
+  age.textContent = targetAge;
+  state.textContent = lang === 'zh' ? stateText_zh : stateText_en;
+
+  // Aura colour
+  const hue = Math.round(250 + buddhi * 40);
+  document.querySelector('.maya-aura').style.background =
+    `radial-gradient(circle, hsla(${hue},70%,60%,0.2) 0%, transparent 70%)`;
+
+  // Glow intensity
+  const glowIntensity = 0.2 + buddhi * 0.5;
+  document.getElementById('maya-svg').style.filter =
+    `drop-shadow(0 0 ${Math.round(8 + buddhi*20)}px rgba(124,111,255,${glowIntensity}))`;
+}
+
+// ── METERS ──
+function updateMeters(buddhi, karmaThresh, vairagyaThresh) {
+  const eff = karmaThresh * (0.5 + buddhi * 0.5);
+  const karmaVal = Math.min(1, eff / 0.1);
+  const prunedEst = currentCondition === 'A' || currentCondition === 'C' ? 0 :
+                    CONDITIONS[currentCondition]?.pruned / 100 || 0.62;
+
+  setMeter('buddhi',  buddhi,        buddhi.toFixed(3));
+  setMeter('karma',   karmaVal,      eff.toFixed(4));
+  setMeter('vairagya',vairagyaThresh,Math.round(vairagyaThresh*100)+'%');
+  setMeter('pruned',  prunedEst,     (prunedEst*100).toFixed(1)+'%');
+  setMeter('bhaya',   0,             '0.000');
+}
+
+function setMeter(name, frac, label) {
+  const fill = document.getElementById(`m-${name}`);
+  const val  = document.getElementById(`mv-${name}`);
+  if (fill) fill.style.width = Math.round(Math.min(1,Math.max(0,frac))*100) + '%';
+  if (val)  val.textContent = label;
+}
+
+// ── CONDITIONS ──
+function selectCondition(key) {
+  currentCondition = key;
+  document.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(`cond-${key}`);
+  if (btn) btn.classList.add('active');
+  updateConditionDesc();
+  updateMeters(
+    parseFloat(document.getElementById('s-buddhi').value),
+    parseFloat(document.getElementById('s-karma-thresh').value),
+    parseFloat(document.getElementById('s-vairagya-thresh').value)
+  );
+  // Animate pruning chart
+  drawPruningChart();
+}
+
+function updateConditionDesc() {
+  const c = CONDITIONS[currentCondition];
+  if (!c) return;
+  const el = document.getElementById('cond-desc-text');
+  el.textContent = c[`desc_${lang}`] || c.desc_en;
+}
+
+// ── CHARTS ──
+function initCharts() {
+  ['karma-chart','vairagya-chart','buddhi-chart','pruning-chart'].forEach(id => {
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth * window.devicePixelRatio || 400;
+    canvas.height = 140 * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    charts[id] = ctx;
+  });
+  updateCharts(CANONICAL.buddhi, CANONICAL.karmaThresh, CANONICAL.karmaDecay);
+}
+
+function updateCharts(buddhi, karmaThresh, karmaDecay) {
+  drawKarmaChart(karmaThresh, karmaDecay);
+  drawVairagyaChart(buddhi);
+  drawBuddhiChart(buddhi);
+  drawPruningChart();
+}
+
+function clearChart(ctx) {
+  const c = ctx.canvas;
+  ctx.clearRect(0, 0, c.width, c.height);
+}
+
+function getW(ctx) { return ctx.canvas.width / window.devicePixelRatio; }
+function getH(ctx) { return ctx.canvas.height / window.devicePixelRatio; }
+
+function drawLine(ctx, pts, color, lw) {
+  const w = getW(ctx), h = getH(ctx);
+  const pad = { l:30, r:10, t:10, b:25 };
+  const cw = w - pad.l - pad.r, ch = h - pad.t - pad.b;
+  const maxY = Math.max(...pts.map(p=>p[1])) * 1.1 || 1;
+  ctx.beginPath();
+  pts.forEach(([x,y],i) => {
+    const px = pad.l + (x/(pts.length-1))*cw;
+    const py = pad.t + ch - (y/maxY)*ch;
+    i === 0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+  });
+  ctx.strokeStyle = color; ctx.lineWidth = lw||2;
+  ctx.lineJoin = 'round'; ctx.stroke();
+
+  // Area fill
+  ctx.lineTo(pad.l + cw, pad.t + ch);
+  ctx.lineTo(pad.l, pad.t + ch);
+  ctx.closePath();
+  ctx.fillStyle = color.replace(')',',0.1)').replace('rgb','rgba');
+  ctx.fill();
+
+  // X axis labels
+  ctx.fillStyle = '#555'; ctx.font = '9px JetBrains Mono';
+  ctx.textAlign = 'center';
+  for (let i=0; i<pts.length; i++) {
+    const px = pad.l + (i/(pts.length-1))*cw;
+    ctx.fillText(`T${i}`, px, h - 5);
+  }
+}
+
+function drawKarmaChart(kt, kd) {
+  const ctx = charts['karma-chart'];
+  clearChart(ctx);
+  const pts = [];
+  let k = 0;
+  for (let t=0; t<10; t++) {
+    k = k * (1-kd) + kt * 0.8;
+    pts.push([t, k]);
+  }
+  drawLine(ctx, pts.map((p,i)=>[i,p[1]]), '#ff6b6b', 2);
+}
+
+function drawVairagyaChart(buddhi) {
+  const ctx = charts['vairagya-chart'];
+  clearChart(ctx);
+  const pts = [0,7.1,16.6,29.8,26.6,25.1,25.4,26.4,22.9,18.1].map((v,i)=>[i,v]);
+  drawLine(ctx, pts, '#4ecdc4', 2);
+}
+
+function drawBuddhiChart(buddhi) {
+  const ctx = charts['buddhi-chart'];
+  clearChart(ctx);
+  // S-curve: logistic
+  const pts = [];
+  for (let t=0; t<10; t++) {
+    const v = 100 / (1 + Math.exp(-0.8*(t-4)));
+    pts.push([t, v]);
+  }
+  drawLine(ctx, pts, '#7c6fff', 2);
+  // Mark current buddhi
+  const w = getW(ctx), h = getH(ctx);
+  const pad = {l:30,r:10,t:10,b:25};
+  const cw = w-pad.l-pad.r, ch = h-pad.t-pad.b;
+  const maxY = 110;
+  const bx = pad.l + ((buddhi*9)/9)*cw;
+  const by = pad.t + ch - (buddhi*100/maxY)*ch;
+  ctx.beginPath();
+  ctx.arc(bx, by, 5, 0, Math.PI*2);
+  ctx.fillStyle = '#f5c842'; ctx.fill();
+}
+
+function drawPruningChart() {
+  const ctx = charts['pruning-chart'];
+  clearChart(ctx);
+  const condData = {
+    A:     [0,0,0,0,0,0,0,0,0,0],
+    B:     [0,0,5,15,30,45,55,60,64,65.95],
+    C:     [0,0,0,0,0,0,0,0,0,0],
+    D:     [0,0,0.02,0.87,5.92,17.26,30.74,44.90,59.28,62.01],
+    E:     [0,0,2,10,25,50,70,85,95,98.48],
+    F:     [0,0,0.02,0.9,6,18,32,46,56,63.40],
+    Dstar: [0,0,0.02,0.87,5.92,17.26,30.74,44.90,59.28,59.28]
+  };
+  const data = condData[currentCondition] || condData.D;
+  const color = currentCondition === 'D' ? '#f5c842' :
+                currentCondition === 'A' || currentCondition === 'C' ? '#4ecdc4' :
+                currentCondition === 'E' ? '#ff4444' : '#ff9f43';
+  drawLine(ctx, data.map((v,i)=>[i,v]), color, 2.5);
+}
+
+// ── MATRIX ──
+function buildMatrix() {
+  const tbody = document.getElementById('matrix-body');
+  MATRIX_D.forEach((row, ti) => {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th');
+    th.textContent = `T${ti}`;
+    tr.appendChild(th);
+    row.forEach((val, tj) => {
+      const td = document.createElement('td');
+      if (val === null) { td.textContent = '—'; td.className = 'zero'; }
+      else if (ti === tj) { td.textContent = val.toFixed(1); td.className = 'diagonal'; }
+      else if (val < 5)   { td.textContent = val.toFixed(1); td.className = 'low'; }
+      else if (val < 15)  { td.textContent = val.toFixed(1); td.className = 'mid'; }
+      else                { td.textContent = val.toFixed(1); td.className = 'high'; }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// ── SECTION NAVIGATION ──
+const SECTION_QUOTES = [0,1,2,3,4,5,6,7];
+function goSection(i) {
+  currentSection = i;
+  document.querySelectorAll('.section-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  document.getElementById('phil-quote').textContent = PHIL_QUOTES[i % PHIL_QUOTES.length][lang];
+  // Scroll to relevant card
+  const cards = ['section-intro','section-intro','section-intro','section-exp','section-results','section-discuss','section-discuss','section-concl'];
+  const el = document.getElementById(cards[i]);
+  if (el) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+  // Maya reacts
+  pulseMaya();
+}
+
+function pulseMaya() {
+  const svg = document.getElementById('maya-svg');
+  svg.style.transform = 'scale(1.05)';
+  setTimeout(() => { svg.style.transform = 'scale(1)'; svg.style.transition = 'transform 0.5s ease'; }, 200);
+}
+
+// ── PARTICLES ──
+function spawnParticles() {
+  const container = document.getElementById('particles');
+  container.innerHTML = '';
+  for (let i=0; i<8; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = (20 + Math.random()*160)+'px';
+    p.style.top  = (200 + Math.random()*60)+'px';
+    p.style.animationDelay = (Math.random()*3)+'s';
+    p.style.animationDuration = (3+Math.random()*2)+'s';
+    const colors = ['var(--accent)','var(--accent3)','var(--karma-color)','var(--gold)'];
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    container.appendChild(p);
+  }
+}
+
+// ── QUOTE ROTATION ──
+let quoteIdx = 0;
+function rotateQuotes() {
+  setInterval(() => {
+    quoteIdx = (quoteIdx + 1) % PHIL_QUOTES.length;
+    const el = document.getElementById('phil-quote');
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.5s';
+    setTimeout(() => {
+      el.textContent = PHIL_QUOTES[quoteIdx][lang];
+      el.style.opacity = '1';
+    }, 500);
+  }, 8000);
+}
+
+// ── FINDING HIGHLIGHT ──
+function highlightFinding(i) {
+  const messages = [
+    { en: "C = A exactly. Karma must accumulate at boundaries, not continuously.", zh: "C精确等于A。业力必须在边界积累，而不是连续地。" },
+    { en: "Karma and Chitta answer different questions. They are not substitutable.", zh: "业力和意识回答不同的问题。它们不可替代。" },
+    { en: "Threshold=0.03 → 98.48% pruned. Spike starvation failure mode confirmed.", zh: "阈值=0.03 → 98.48%剪枝。脉冲饥饿失败模式确认。" },
+    { en: "Vairagya protects what has proven its value. Earned resilience moderates consequence.", zh: "离欲保护已证明其价值的东西。获得的韧性调节后果。" }
+  ];
+  document.getElementById('phil-quote').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('phil-quote').textContent = `"${messages[i][lang]}"`;
+    document.getElementById('phil-quote').style.opacity = '1';
+  }, 300);
+}
+
+// Redraw charts on resize
+window.addEventListener('resize', () => {
+  ['karma-chart','vairagya-chart','buddhi-chart','pruning-chart'].forEach(id => {
+    const canvas = document.getElementById(id);
+    canvas.width = canvas.offsetWidth * window.devicePixelRatio || 400;
+    canvas.height = 140 * window.devicePixelRatio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    charts[id] = ctx;
+  });
+  updateCharts(
+    parseFloat(document.getElementById('s-buddhi').value),
+    parseFloat(document.getElementById('s-karma-thresh').value),
+    parseFloat(document.getElementById('s-karma-decay').value)
+  );
+});
+</script>
+</body>
+</html>
