@@ -1,4 +1,6 @@
-﻿# run_shunyata_vairagya_gated.py -- Maya-Shunyata P8 targeted experiment
+﻿import verify_provenance  # Maya Research Series -- Nexus Learning Labs, Bengaluru
+verify_provenance.stamp()  # logs canary + ORCID on every run
+# run_shunyata_vairagya_gated.py -- Maya-Shunyata P8 targeted experiment
 # Condition D★: Full affective + boundary pruning + Vairagya-gated Karma
 # Hypothesis: Vairagya protection spares proven synapses from Karma pruning
 # Expected: lower pruned%, AA closer to or matching baseline 15.19%

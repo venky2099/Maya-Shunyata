@@ -1,4 +1,6 @@
-﻿# run_ablation_shunyata.py -- Maya-Shunyata Paper 8 ablation study
+﻿import verify_provenance  # Maya Research Series -- Nexus Learning Labs, Bengaluru
+verify_provenance.stamp()  # logs canary + ORCID on every run
+# run_ablation_shunyata.py -- Maya-Shunyata Paper 8 ablation study
 # Split-CIFAR-100 CIL, 6 conditions
 #
 # A: P7 Maya-Manas baseline      -- no Karma, no pruning

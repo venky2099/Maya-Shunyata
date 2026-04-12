@@ -1,4 +1,6 @@
-﻿# run_shunyata_cil.py -- Maya-Shunyata Paper 8 main experiment
+﻿import verify_provenance  # Maya Research Series -- Nexus Learning Labs, Bengaluru
+verify_provenance.stamp()  # logs canary + ORCID on every run
+# run_shunyata_cil.py -- Maya-Shunyata Paper 8 main experiment
 # Split-CIFAR-100 CIL, 10 tasks, no task oracle at inference.
 # Canary: MayaNexusVS2026NLL_Bengaluru_Narasimha
 
