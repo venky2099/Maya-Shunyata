@@ -1,0 +1,18 @@
+﻿cff-version: 1.2.0
+title: "Maya-Shunyata: Karma-Weighted Synaptic Pruning for Class-Incremental Learning in Affective SNNs"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Swaminathan
+    given-names: Venkatesh
+    orcid: "https://orcid.org/0000-0002-3315-7907"
+    affiliation: "Nexus Learning Labs, Bengaluru"
+repository-code: "https://github.com/venky2099/Maya-Shunyata"
+doi: 10.5281/zenodo.19397010
+date-released: "2026-04-01"
+license: MIT
+keywords:
+  - synaptic pruning
+  - continual learning
+  - spiking neural networks
+  - Maya Research Series
